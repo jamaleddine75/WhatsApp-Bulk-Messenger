@@ -51,6 +51,19 @@ whatsapp_messenger.db
 *.db-shm
 audit_*.csv
 
+# CSV files - contacts, phone numbers, and private campaign data
+*.csv
+**/*.csv
+
+# Excel files that may contain private contact data
+*.xlsx
+*.xls
+
+# Local contact imports and exports
+contacts/
+exports/
+imports/
+
 # Environment and secrets
 .env
 .env.local
