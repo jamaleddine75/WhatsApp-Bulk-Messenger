@@ -1,0 +1,11 @@
+{
+  "name": "Product Offer (with Custom Variables)",
+  "body": "Bonjour {name},\n\nNous vous contactons concernant votre intérêt pour {product}.\nLe tarif spécial pour vous est de {price} MAD (disponible à {city}).\n\nRépondez OUI pour confirmer votre commande.\nBien cordialement,\nL'équipe commerciale",
+  "custom_variables": {
+    "product": "Formation Python",
+    "price": "500",
+    "city": "Casablanca"
+  },
+  "created_at": "2026-11-02T18:36:31.415323",
+  "updated_at": "2026-11-02T18:36:31.458156"
+}
