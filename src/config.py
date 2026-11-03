@@ -1,6 +1,9 @@
 """Configuration and constants for WhatsApp Bulk Messenger."""
 
 import os
+from pathlib import Path
+import shutil
+import sys
 from typing import Dict
 
 try:
@@ -18,9 +21,82 @@ WINDOW_HEIGHT = 650
 MIN_WINDOW_WIDTH = 840
 MIN_WINDOW_HEIGHT = 500
 
-# Paths
-DEFAULT_LOG_FILE = "sent_log.csv"
-SAMPLE_CONTACTS_FILE = "sample_contacts.csv"
+
+def get_resource_path(relative_path: str = "") -> Path:
+    """Return absolute path to resource, working for dev and PyInstaller (_MEIPASS)."""
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+        base_path = Path(sys._MEIPASS)
+    else:
+        base_path = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+    return base_path / relative_path if relative_path else base_path
+
+
+def get_user_data_dir() -> Path:
+    """Return dedicated per-user writable data directory (%LOCALAPPDATA%/WhatsAppBulkMessenger)."""
+    if sys.platform == "win32":
+        local_app_data = os.environ.get("LOCALAPPDATA")
+        if local_app_data:
+            base_dir = Path(local_app_data) / "WhatsAppBulkMessenger"
+        else:
+            base_dir = Path.home() / "AppData" / "Local" / "WhatsAppBulkMessenger"
+    else:
+        base_dir = Path.home() / ".whatsapp_messenger"
+
+    base_dir.mkdir(parents=True, exist_ok=True)
+    return base_dir
+
+
+def migrate_existing_data(target_dir: Path) -> None:
+    """Safely migrate any existing database, logs, sessions, or templates into user data dir.
+
+    Preserves existing user data during updates and never overwrites active databases.
+    """
+    dev_root = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+    files_to_migrate = [
+        "whatsapp_messenger.db",
+        "sent_log.csv",
+        "piwapp_session.json",
+        "piwapp_session.json.keys",
+        "piwapp_version.json",
+    ]
+
+    for fname in files_to_migrate:
+        src = dev_root / fname
+        dst = target_dir / fname
+        if src.exists() and not dst.exists():
+            try:
+                shutil.copy2(src, dst)
+            except Exception:
+                pass
+
+    # Migrate or seed templates
+    templates_dst = target_dir / "templates"
+    templates_dst.mkdir(parents=True, exist_ok=True)
+
+    templates_src = dev_root / "data" / "templates"
+    bundled_templates = get_resource_path("data/templates")
+
+    for tsrc in (templates_src, bundled_templates):
+        if tsrc.exists() and tsrc.is_dir():
+            for tfile in tsrc.glob("*.json"):
+                target_file = templates_dst / tfile.name
+                if not target_file.exists():
+                    try:
+                        shutil.copy2(tfile, target_file)
+                    except Exception:
+                        pass
+
+
+# Per-User Persistent Application Paths
+USER_DATA_DIR: Path = get_user_data_dir()
+migrate_existing_data(USER_DATA_DIR)
+
+DEFAULT_DB_FILE: str = str(USER_DATA_DIR / "whatsapp_messenger.db")
+DEFAULT_LOG_FILE: str = str(USER_DATA_DIR / "sent_log.csv")
+DEFAULT_TEMPLATES_DIR: Path = USER_DATA_DIR / "templates"
+DEFAULT_SESSION_FILE: str = str(USER_DATA_DIR / "piwapp_session.json")
+DEFAULT_VERSION_FILE: str = str(USER_DATA_DIR / "piwapp_version.json")
+SAMPLE_CONTACTS_FILE: str = str(get_resource_path("sample_contacts.csv"))
 
 # Pacing and Limits
 MIN_DELAY_SECONDS = 3

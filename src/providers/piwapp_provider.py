@@ -9,6 +9,7 @@ import time
 import urllib.request
 from typing import Any, Callable, Optional, Tuple
 
+from src.config import DEFAULT_SESSION_FILE, DEFAULT_VERSION_FILE
 from src.diagnostics import get_logger
 from src.models import Contact, SendStatus
 from src.providers.base import BaseMessageProvider, ProviderResult
@@ -73,14 +74,16 @@ class PiwappProvider(BaseMessageProvider):
 
     def __init__(
         self,
-        session_path: str = "piwapp_session.json",
+        session_path: Optional[str] = None,
         keys_path: Optional[str] = None,
         client_factory: Optional[Callable[..., Any]] = None,
-        version_cache_path: Optional[str] = "piwapp_version.json",
+        version_cache_path: Optional[str] = None,
     ):
-        self.session_path = Path(session_path)
+        actual_session = session_path if session_path is not None else DEFAULT_SESSION_FILE
+        self.session_path = Path(actual_session)
         self.keys_path = Path(keys_path) if keys_path else self.session_path.with_suffix(self.session_path.suffix + ".keys")
-        self.version_cache_path = Path(version_cache_path) if version_cache_path else None
+        actual_version = version_cache_path if version_cache_path is not None else DEFAULT_VERSION_FILE
+        self.version_cache_path = Path(actual_version) if actual_version else None
         self.client_factory = client_factory
 
         self._client: Optional[Any] = None

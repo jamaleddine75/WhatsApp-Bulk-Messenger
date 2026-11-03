@@ -32,7 +32,30 @@ def main() -> None:
         print("\nApplication closed by user.")
         sys.exit(0)
     except Exception as e:
-        print(f"Fatal error launching application: {e}")
+        import traceback
+        err_msg = traceback.format_exc()
+        print(f"Fatal error launching application:\n{err_msg}")
+        try:
+            from src.config import get_user_data_dir
+            crash_file = get_user_data_dir() / "crash.log"
+            crash_file.write_text(err_msg, encoding="utf-8")
+        except Exception:
+            pass
+        try:
+            import tkinter as tk
+            from tkinter import messagebox
+            root = tk.Tk()
+            root.withdraw()
+            messagebox.showerror(
+                f"{APP_NAME} - Launch Error",
+                f"A fatal error occurred while starting {APP_NAME} v{APP_VERSION}:\n\n"
+                f"{e}\n\n"
+                f"Detailed log written to:\n"
+                f"%LOCALAPPDATA%\\WhatsAppBulkMessenger\\crash.log"
+            )
+            root.destroy()
+        except Exception:
+            pass
         sys.exit(1)
 
 

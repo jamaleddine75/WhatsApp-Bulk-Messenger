@@ -14,6 +14,7 @@ from src.config import (
     MIN_WINDOW_HEIGHT,
     MIN_WINDOW_WIDTH,
     WINDOW_TITLE,
+    get_resource_path,
 )
 from src.contact_manager import ContactManager
 from src.database import DEFAULT_DB_FILE, DatabaseManager
@@ -40,6 +41,14 @@ class WhatsAppBulkMessengerApp(ctk.CTk):
         ctk.set_default_color_theme("blue")
 
         self.title(WINDOW_TITLE)
+
+        # Set application icon if available
+        icon_path = get_resource_path("app_icon.ico")
+        if icon_path.exists():
+            try:
+                self.iconbitmap(str(icon_path))
+            except Exception as e:
+                _logger.debug("Could not set window iconbitmap: %s", e)
 
         # Dynamic, screen-responsive window sizing
         screen_w = self.winfo_screenwidth()

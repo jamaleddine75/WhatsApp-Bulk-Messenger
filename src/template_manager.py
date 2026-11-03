@@ -8,12 +8,10 @@ from pathlib import Path
 import re
 from typing import Dict, List, Optional, Tuple
 
-from src.config import PRESET_TEMPLATES
+from src.config import DEFAULT_TEMPLATES_DIR, PRESET_TEMPLATES
 from src.diagnostics import get_logger
 
 _logger = get_logger()
-
-DEFAULT_TEMPLATES_DIR = Path("data") / "templates"
 
 
 @dataclass

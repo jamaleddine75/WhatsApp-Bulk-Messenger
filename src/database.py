@@ -7,7 +7,7 @@ import threading
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set
 
-DEFAULT_DB_FILE = "whatsapp_messenger.db"
+from src.config import DEFAULT_DB_FILE
 
 
 class DatabaseManager:

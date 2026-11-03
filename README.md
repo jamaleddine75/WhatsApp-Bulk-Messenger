@@ -29,6 +29,7 @@
 - [Architecture & Workflow](#-architecture--workflow)
 - [Requirements](#-requirements)
 - [Installation](#-installation)
+- [Windows Standalone Executable (.exe)](#-windows-standalone-executable-exe)
 - [Provider Setup & Authentication](#-provider-setup--authentication)
   - [1. piwapp Pure-Python Automation (Default)](#1-piwapp-pure-python-automation-default)
   - [2. WhatsApp Web Manual Review (Fallback)](#2-whatsapp-web-manual-review-fallback)
@@ -237,6 +238,56 @@ pip install -r requirements.txt
 ```bash
 python main.py
 ```
+
+---
+
+## 📦 Windows Standalone Executable (.exe)
+
+You can package and distribute **WhatsApp Bulk Messenger** as a native, standalone Windows application that runs without requiring Python to be installed on target machines.
+
+### 🛠️ One-Click Build Script
+
+Run the automated Windows batch build script from the repository root:
+
+```cmd
+build_windows.bat
+```
+
+This automated script performs:
+1. **Python Environment Verification:** Ensures Python 3.10+ is detected.
+2. **PyInstaller Check:** Automatically installs or updates PyInstaller.
+3. **Automated Test Suite:** Runs all 81 unit & integration tests before building to guarantee code integrity.
+4. **Clean Binary Compilation:** Builds `dist\WhatsAppBulkMessenger\WhatsAppBulkMessenger.exe` using `WhatsAppBulkMessenger.spec`.
+
+### ⚙️ Manual Build via PyInstaller Spec
+
+If compiling manually from PowerShell or Command Prompt:
+
+```cmd
+python -m PyInstaller WhatsAppBulkMessenger.spec --noconfirm --clean
+```
+
+The output executable is generated at:
+```text
+dist\WhatsAppBulkMessenger\WhatsAppBulkMessenger.exe
+```
+
+### 📂 Per-User Data Directory (`%LOCALAPPDATA%`)
+
+When running as a packaged standalone binary, application data is isolated to a writable per-user directory:
+```text
+%LOCALAPPDATA%\WhatsAppBulkMessenger\
+├── whatsapp_messenger.db        # SQLite campaign and message database
+├── sent_log.csv                 # Audit log of message delivery attempts
+├── piwapp_session.json          # Multi-device pairing credentials
+├── piwapp_session.json.keys     # Encryption keys & pre-keys
+└── templates\                   # User-defined message templates (.json)
+```
+
+**Key Architectural Guarantees:**
+- **Zero Data Loss:** On first launch, existing local database files, session keys, and custom templates are non-destructively migrated to `%LOCALAPPDATA%\WhatsAppBulkMessenger\`.
+- **Privacy & Security:** Sensitive contact CSVs, active session credentials, and local databases are **never** bundled inside the distribution executable.
+- **Fail-Safe Crash Reporting:** If a fatal startup error occurs, a native Windows alert dialog is displayed with a direct link to `%LOCALAPPDATA%\WhatsAppBulkMessenger\crash.log`.
 
 ---
 
